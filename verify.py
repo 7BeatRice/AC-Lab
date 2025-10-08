@@ -259,7 +259,7 @@ with open(sys.argv[1], "r") as infile:
         pass
     lines = []
     for line in infile:
-        if ".-hamming_decode" in line:
+        if ".-random_num_gen" in line:
             break
         if len(line.strip()) == 0:
             continue
