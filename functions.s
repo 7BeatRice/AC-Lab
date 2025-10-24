@@ -27,11 +27,11 @@ bit_rotate_l:
     // (STUDENT TODO) Code for bit_rotate_l goes here.
     // Input parameter n is passed in X0; input parameter shift is passed in X1.
     // Output value is returned in X0.
-    MOVZ    X5, #64          // X5 = 64
-    SUB     X4, X5, X1       // X4 = 64 - shift
-    LSL     X3, X0, X1       // X3 = n << shift
-    LSR     X2, X0, X4       // X2 = n >> (64 - shift)
-    ORR     X0, X3, X2       // X0 = (n << shift) ^ (n >> (64 - shift))
+    LSL     X2, X0, X1           // X2 = n << shift
+    MOVZ    X3, #64
+    SUB     X3, X3, X1            // X3 = 64 - shift
+    LSR     X3, X0, X3           // X3 = n >> (64 - shift)
+    ORR     X0, X2, X3           // X0 = (n << shift) | (n >> (64 - shift))
     
 
     ret
@@ -48,11 +48,11 @@ bit_rotate_r:
     // (STUDENT TODO) Code for bit_rotate_r goes here.
     // Input parameter n is passed in X0; input parameter shift is passed in X1.
     // Output value is returned in X0.
-    movz    x5, #64
-    sub     x4, x5, x1        // x4 = 64 - shift
-    lsl     x3, x0, x4        // x3 = n << (64 - shift)
-    lsr     x2, x0, x1        // x2 = n >> shift
-    orr     x0, x3, x2        // x0 = (n << (64 - shift)) | (n >> shift)
+    LSR     X2, X0, X1           // X2 = n >> shift
+    MOVZ    X3, #64
+    SUB     X3, X3, X1            // X3 = 64 - shift
+    LSL     X3, X0, X3           // X3 = n << (64 - shift)
+    ORR     X0, X2, X3           // X0 = (n >> shift) | (n << (64 - shift))
 
     ret
     .size   bit_rotate_r, .-bit_rotate_r
