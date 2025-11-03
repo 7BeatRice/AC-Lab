@@ -551,7 +551,7 @@ random_num_gen:
     // Input parameter state is passed in X0
     // Output value is returned in X0.
 
- SUB     SP, SP, #48
+    SUB     SP, SP, #48
     STUR    X30, [SP, #40]
     STUR    X0,  [SP, #32]      // save base pointer
 
