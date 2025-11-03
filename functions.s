@@ -551,7 +551,7 @@ random_num_gen:
     // Input parameter state is passed in X0
     // Output value is returned in X0.
 
-    SUB     SP, SP, #48
+ SUB     SP, SP, #48
     STUR    X30, [SP, #40]
     STUR    X0,  [SP, #32]      // save base pointer
 
@@ -565,7 +565,7 @@ random_num_gen:
     ADDS     X5, X1, X4          // rand = s0 + s3
 
     // Save original s1 for later use
-    MOVZ     X6, X2              // old_s1 = s1
+    ORR     X6, XZR, X2              // old_s1 = s1
 
     // Step 1: s2 ^= s0
     EOR     X3, X3, X1
@@ -589,11 +589,11 @@ random_num_gen:
     STUR    X2, [SP, #8]        // save s1
     STUR    X3, [SP, #16]       // save s2
 
-    MOVZ     X0, X4              // arg0 = s3
+    ORR     X0, XZR, X4              // arg0 = s3
     MOVZ    X1, #45             // arg1 = 45
     BL      bit_rotate_l        // returns rotated s3 in X0
 
-    MOVZ     X4, X0              // restore rotated s3
+    ORR     X4, XZR, X0              // restore rotated s3
     LDUR    X1, [SP, #0]        // reload s0
     LDUR    X2, [SP, #8]        // reload s1
     LDUR    X3, [SP, #16]       // reload s2
@@ -608,7 +608,7 @@ random_num_gen:
     STUR    X4, [X0, #24]       // state[3] = s3
 
     // Return rand
-    MOVZ     X0, X5
+    ORR     X0, XZR, X5
 
     LDUR    X30, [SP, #40]
     ADD     SP, SP, #48
