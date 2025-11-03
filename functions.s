@@ -158,107 +158,107 @@ UTF8_to_unicode:
             .size	UTF8_to_unicode, .-UTF8_to_unicode
             // ... and ends with the .size above this line.
 
-        // Every function starts from the .align below this line ...
-            .align	2
-            .global	unicode_to_UTF8
-            .type	unicode_to_UTF8, %function
-        unicode_to_UTF8:
-            // (STUDENT TODO) Code for unicode_to_UTF8 goes here.
-            // Input parameter a is passed in X0; input parameter utf8 is passed in X1
-            // There are no output values
-            
-                MOVZ X2, #0x10, LSL #16
-            MOVK X2, #0xFFFF
-            CMP  X0, X2
-            B.GT invalid_codepoint
+// Every function starts from the .align below this line ...
+    .align	2
+    .global	unicode_to_UTF8
+    .type	unicode_to_UTF8, %function
+unicode_to_UTF8:
+    // (STUDENT TODO) Code for unicode_to_UTF8 goes here.
+    // Input parameter a is passed in X0; input parameter utf8 is passed in X1
+    // There are no output values
+    
+        MOVZ X2, #0x10, LSL #16
+    MOVK X2, #0xFFFF
+    CMP  X0, X2
+    B.GT invalid_codepoint
 
-            //   1-byte check (< 0x80)  
-            MOVZ X3, #0x80
-            CMP  X0, X3
-            B.LT one_byte
+       // 1-byte check (< 0x80)  
+    MOVZ X3, #0x80
+    CMP  X0, X3
+    B.LT one_byte
 
-            //   2-byte check (< 0x800)  
-            MOVZ X3, #0x800
-            CMP  X0, X3
-            B.LT two_bytes
+       // 2-byte check (< 0x800)  
+    MOVZ X3, #0x800
+    CMP  X0, X3
+    B.LT two_bytes
 
-            //   3-byte check (< 0x10000)  
-            MOVZ X3, #0x1, LSL #16
-            CMP  X0, X3
-            B.LT three_bytes
+       // 3-byte check (< 0x10000)  
+    MOVZ X3, #0x1, LSL #16
+    CMP  X0, X3
+    B.LT three_bytes
 
-            // else, 4-byte
-            B four_bytes
+    // else, 4-byte
+    B four_bytes
 
-        //     1-byte    
-        one_byte:
-            MOVZ X3, #0x7F
-            ANDS X4, X0, X3
-            STUR X4, [X1, #0]
-            RET
+      // 1-byte    
+one_byte:
+    MOVZ X3, #0x7F
+    ANDS X4, X0, X3
+    STUR X4, [X1, #0]
+    RET
 
-        //     2-byte    
-        two_bytes:
-            MOVZ X5, #0x3F
-            ANDS X4, X0, X5        // second byte mask
-            MOVZ X5, #0x80
-            ORR  X4, X4, X5        // second byte = masked | 0x80
+      // 2-byte    
+two_bytes:
+    MOVZ X5, #0x3F
+    ANDS X4, X0, X5        // second byte mask
+    MOVZ X5, #0x80
+    ORR  X4, X4, X5        // second byte = masked | 0x80
 
-            LSR  X3, X0, #6
-            MOVZ X5, #0xC0
-            ORR  X3, X3, X5        // first byte = (X0>>6) | 0xC0
+    LSR  X3, X0, #6
+    MOVZ X5, #0xC0
+    ORR  X3, X3, X5        // first byte = (X0>>6) | 0xC0
 
-            LSL  X4, X4, #8
-            ORR  X3, X3, X4
-            STUR X3, [X1, #0]
-            RET
+    LSL  X4, X4, #8
+    ORR  X3, X3, X4
+    STUR X3, [X1, #0]
+    RET
 
-        //     3-byte    
-        three_bytes:
-            MOVZ X7, #0x3F
-            ANDS X6, X0, X7        // third byte
-            ADD  X6, X6, #0x80
-            LSR  X5, X0, #6
-            ANDS X5, X5, X7        // second byte
-            ADD  X5, X5, #0x80
-            LSR  X4, X0, #12
-            ADD  X4, X4, #0xE0      // first byte
-            LSL  X5, X5, #8
-            LSL  X6, X6, #16
-            ORR  X4, X4, X5
-            ORR  X4, X4, X6
-            STUR X4, [X1, #0]
-            RET
+      // 3-byte    
+three_bytes:
+    MOVZ X7, #0x3F
+    ANDS X6, X0, X7        // third byte
+    ADD  X6, X6, #0x80
+    LSR  X5, X0, #6
+    ANDS X5, X5, X7        // second byte
+    ADD  X5, X5, #0x80
+    LSR  X4, X0, #12
+    ADD  X4, X4, #0xE0      // first byte
+    LSL  X5, X5, #8
+    LSL  X6, X6, #16
+    ORR  X4, X4, X5
+    ORR  X4, X4, X6
+    STUR X4, [X1, #0]
+    RET
 
-        //   4-byte  
-        four_bytes:
-            MOVZ X8, #0x3F
-            ANDS X7, X0, X8        // fourth byte
-            ADD  X7, X7, #0x80
-            LSR  X6, X0, #6
-            ANDS X6, X6, X8        // third byte
-            ADD  X6, X6, #0x80
-            LSR  X5, X0, #12
-            ANDS X5, X5, X8        // second byte
-            ADD  X5, X5, #0x80
-            LSR  X4, X0, #18
-            ADD  X4, X4, #0xF0      // first byte
-            LSL  X5, X5, #8
-            LSL  X6, X6, #16
-            LSL  X7, X7, #24
-            ORR  X4, X4, X5
-            ORR  X4, X4, X6
-            ORR  X4, X4, X7
-            STUR X4, [X1, #0]
-            RET
+   // 4-byte  
+four_bytes:
+    MOVZ X8, #0x3F
+    ANDS X7, X0, X8        // fourth byte
+    ADD  X7, X7, #0x80
+    LSR  X6, X0, #6
+    ANDS X6, X6, X8        // third byte
+    ADD  X6, X6, #0x80
+    LSR  X5, X0, #12
+    ANDS X5, X5, X8        // second byte
+    ADD  X5, X5, #0x80
+    LSR  X4, X0, #18
+    ADD  X4, X4, #0xF0      // first byte
+    LSL  X5, X5, #8
+    LSL  X6, X6, #16
+    LSL  X7, X7, #24
+    ORR  X4, X4, X5
+    ORR  X4, X4, X6
+    ORR  X4, X4, X7
+    STUR X4, [X1, #0]
+    RET
 
-        //   Invalid    
-        invalid_codepoint:
-            MOVZ X3, #0xFFFF
-            LSL  X3, X3, #16
-            MOVK X3, #0xFFFF
-            STUR X3, [X1, #0]
-            RET
+   // Invalid    
+invalid_codepoint:
+    MOVZ X3, #0xFFFF
+    LSL  X3, X3, #16
+    MOVK X3, #0xFFFF
+    STUR X3, [X1, #0]
+    RET
 
 
 	.size	unicode_to_UTF8, .-unicode_to_UTF8
@@ -353,8 +353,47 @@ tree_depth:
     // (STUDENT TODO) Code for tree_depth goes here.
     // Input parameter root is passed in X0.
     // Output value is returned in X0.
+     // if root == NULL, return 0
 
-    ret
+        // if (root == NULL) return 0
+    CMP X0, XZR
+    B.EQ base_case
+
+          // make a stack frame    
+    SUB SP, SP, #32
+    STUR X30, [SP, #16]      // save return address
+    STUR X0, [SP, #8]        // save root pointer
+
+          // compute left depth    
+    LDUR X0, [SP, #8]        // reload root
+    LDUR X0, [X0, #0]         // load left pointer
+    BL tree_depth
+    STUR X0, [SP, #0]        // store left depth at [SP,#0]
+
+          // compute right depth    
+    LDUR X0, [SP, #8]        // reload root
+    LDUR X0, [X0, #8]         // load right pointer
+    BL tree_depth
+    LDUR X2, [SP, #0]        // X2 = left depth
+    ADD X3, X0, #0          // X3 = right depth
+
+       // choose max(left,right)  
+    CMP X2, X3
+    B.GE left_greater
+    ADD X0, X3, #1            // X0 = right_depth + 1
+    B end
+
+left_greater:
+    ADD X0, X2, #1            // X0 = left_depth + 1
+
+end:
+    LDUR X30, [SP, #16]      // restore LR
+    ADD SP, SP, #32         // pop frame
+    RET
+
+base_case:
+    MOVZ X0, #0
+    RET
 	.size	tree_depth, .-tree_depth
 	// ... and ends with the .size above this line.
 
@@ -367,7 +406,70 @@ change_case:
     // Input parameter str is passed in X0; input parameter flag is passed in X1.
     // There is no output value. Parameter str will be mutated.
 
-ret
+change_case:
+    // X0 = str, X1 = flag
+    // We'll use X2–X9 as temporaries
+
+loop:
+    LDUR X2, [X0, #0]             // Load 8 bytes
+    MOVZ X3, #0                   // Byte index = 0
+
+byte_loop:
+    // Extract one byte: X4 = (X2 >> (X3*8)) & 0xFF
+    LSL X5, X3, #3                // shift = index * 8
+    LSR X4, X2, X5
+    MOVZ X8, 0XFF
+    ANDS X4, X4, X8           // keep lowest byte
+    CMP X4, XZR                  // check for null
+    B.EQ done                     // end if '\0'
+
+    // flag == 0 ? lowercase : uppercase
+    CMP X1, XZR
+    B.EQ to_lower
+
+//  to UPPER   
+    MOVZ X8, #'a'
+    CMP X4, X8                // if below 'a' skip
+    B.LT skip
+    MOVZ X8, #'z'
+    CMP X4, X8
+    B.GT skip
+    SUB X4, X4, #0x20             // convert to uppercase
+    B insert
+
+   //  to LOWER   
+to_lower:
+    MOVZ X8, #'A'
+    CMP X4, X8
+    B.LT skip
+    MOVZ X8, #'Z'
+    CMP X4, x8
+    B.GT skip
+    ADD X4, X4, #0x20             // convert to lowercase
+
+   //  insert   
+insert:
+    // Clear target byte from X2 and reinsert new value
+    MOVZ X6, #0xFF
+    LSL X6, X6, X5                // X6 = mask << shift
+    MVN X6, X6                    // invert mask (clear target byte)
+    ANDS X2, X2, X6               // clear that byte
+    LSL X7, X4, X5                // place byte in position
+    ORR X2, X2, X7                // insert it
+
+skip:
+    ADD X3, X3, #1                // next byte index
+    MOVZ X8, #8
+    CMP X3, X8
+    B.LT byte_loop
+
+    STUR X2, [X0, #0]             // store modified 8 bytes
+    ADD X0, X0, #8                // move pointer
+    B loop                        // continue
+
+done:
+    STUR X2, [X0, #0]             // store partial block (safe)
+    RET
 
 	.size	change_case, .-change_case
 	// ... and ends with the .size above this line.
@@ -382,7 +484,60 @@ ustrncmp:
     // Input parameter str1 is passed in X0; Input parameter str2 is passed in X1; Input parameter num is passed in X2
     // Output value is returned in X0.
 
-    ret
+
+     MOVZ    X3, #0              // index = 0
+
+    ustrncmp_loop:
+        CMP     X3, X2              // index >= num ?
+        B.GE    ustrncmp_all_equal  // yes → all equal
+
+        // Load bytes from str1/str2
+        LDUR    X4, [X0, #0]        // load 8 bytes from str1
+        LDUR    X5, [X1, #0]        // load 8 bytes from str2
+
+        // extract lowest byte
+        MOVZ X8, #0xFF
+        ANDS    X6, X4, X8
+        ANDS    X7, X5, X8
+
+        // if either null terminator, done (equal so far)
+        CMP     X6, XZR
+        B.EQ    ustrncmp_null_hit
+        CMP     X7, XZR
+        B.EQ    ustrncmp_null_hit
+
+        // compare bytes
+        CMP     X6, X7
+        B.EQ    ustrncmp_next_byte
+        B.LT    ustrncmp_less
+        B.GT    ustrncmp_greater
+
+    ustrncmp_next_byte:
+        // advance pointers +1
+        ADD     X0, X0, #1
+        ADD     X1, X1, #1
+        ADD     X3, X3, #1
+        B       ustrncmp_loop
+
+
+    ustrncmp_less:
+        // return -1
+        MOVZ    X0, #1
+        MVN     X0, X0          // X0 = ~1 = 0xFFFFFFFFFFFFFFFE
+        ADD     X0, X0, #1      // X0 = -1
+        RET
+
+    ustrncmp_greater:
+        MOVZ    X0, #1
+        RET
+
+    ustrncmp_null_hit:
+        MOVZ    X0, #100
+        RET
+
+    ustrncmp_all_equal:
+        MOVZ    X0, #2
+        RET
     .size   ustrncmp, .-ustrncmp
     // ... and ends with the .size above this line.
 
@@ -395,6 +550,69 @@ random_num_gen:
     // (STUDENT TODO) Code for random_num_gen goes here.
     // Input parameter state is passed in X0
     // Output value is returned in X0.
+
+ SUB     SP, SP, #48
+    STUR    X30, [SP, #40]
+    STUR    X0,  [SP, #32]      // save base pointer
+
+    // Load state[0..3]
+    LDUR    X1, [X0, #0]        // s0
+    LDUR    X2, [X0, #8]        // s1
+    LDUR    X3, [X0, #16]       // s2
+    LDUR    X4, [X0, #24]       // s3
+
+    // Return value = s0 + s3
+    ADDS     X5, X1, X4          // rand = s0 + s3
+
+    // Save original s1 for later use
+    MOVZ     X6, X2              // old_s1 = s1
+
+    // Step 1: s2 ^= s0
+    EOR     X3, X3, X1
+
+    // Step 2: s3 ^= s1
+    EOR     X4, X4, X2
+
+    // Step 3: s1 ^= s2
+    EOR     X2, X2, X3
+
+    // Step 4: s0 ^= s3
+    EOR     X1, X1, X4
+
+    // Step 5: s2 ^= (old_s1 << 17)
+    LSL     X7, X6, #17
+    EOR     X3, X3, X7
+
+    // Step 6: rotate s3 left by 45 bits
+    // (need to preserve s0–s2 before call)
+    STUR    X1, [SP, #0]        // save s0
+    STUR    X2, [SP, #8]        // save s1
+    STUR    X3, [SP, #16]       // save s2
+
+    MOVZ     X0, X4              // arg0 = s3
+    MOVZ    X1, #45             // arg1 = 45
+    BL      bit_rotate_l        // returns rotated s3 in X0
+
+    MOVZ     X4, X0              // restore rotated s3
+    LDUR    X1, [SP, #0]        // reload s0
+    LDUR    X2, [SP, #8]        // reload s1
+    LDUR    X3, [SP, #16]       // reload s2
+
+    // Restore pointer
+    LDUR    X0, [SP, #32]
+
+    // Store updated state
+    STUR    X1, [X0, #0]        // state[0] = s0
+    STUR    X2, [X0, #8]        // state[1] = s1
+    STUR    X3, [X0, #16]       // state[2] = s2
+    STUR    X4, [X0, #24]       // state[3] = s3
+
+    // Return rand
+    MOVZ     X0, X5
+
+    LDUR    X30, [SP, #40]
+    ADD     SP, SP, #48
+    RET
 
     .size   random_num_gen, .-random_num_gen
     // ... and ends with the .size above this line.
